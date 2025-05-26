@@ -276,10 +276,17 @@ function App() {
         return acc;
     }, {});
 
-    const paginatedWeapons = Object.keys(filteredWeapons).reduce((acc, category) => {
-        const start = currentPage * weaponsPerPage;
-        const end = start + weaponsPerPage;
-        acc[category] = filteredWeapons[category].slice(start, end);
+    // Flatten the filtered weapons for pagination
+    const allFiltered = Object.values(filteredWeapons).flat();
+    const start = currentPage * weaponsPerPage;
+    const end = start + weaponsPerPage;
+    const currentSlice = allFiltered.slice(start, end);
+
+    // Group the current page of weapons back by category for rendering
+    const paginatedWeapons = currentSlice.reduce((acc, weapon) => {
+        const category = weapon.category || 'Uncategorized';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(weapon);
         return acc;
     }, {});
 
@@ -398,7 +405,7 @@ function App() {
                         <ReactPaginate
                             previousLabel={'Previous'}
                             nextLabel={'Next'}
-                            pageCount={Math.ceil(Object.keys(filteredWeapons).length / weaponsPerPage)}
+                            pageCount={Math.ceil(allFiltered.length / weaponsPerPage)}
                             onPageChange={handlePageClick}
                             containerClassName={'pagination'}
                             activeClassName={'active'}
